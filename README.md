@@ -1,40 +1,29 @@
-http 反向代理 灰度转发
+block-web-server 可以按照预期 阻塞 的 http web server
 ----
 
-## 部署
+[TOC]
 
-部署文件 请看 `example/proxy-grey.yaml`  
-需要有 `nginx` namespace
+## 功能
 
-## 配置文件
-配置文件是采用 `ConfigMap` 挂载的形式
+### 1. block
 
-需要新建一个 `grey-conf` 的 `ConfigMap`  
-它由一个`key` 为 `config.yaml`  
-`value` 就是配置文件的内容
+`/block{x}` 这个接口的任何方法(get/put) `阻塞` `x 秒` （`x`必须为数字）
 
-请参考 默认配置文件 `example/config.yaml`
+比如 
+接口`/block1`， 会阻塞 `1秒`  
+接口`/block2`， 会阻塞 `2秒`  
+接口`/block3`， 会阻塞 `3秒`  
 
-## 配置
-### header
-语法 
-- `header("X-C-Version", "4.7.0")`
-`header`字段`X-C-Version` 是否 `等于` `4.7.0`
-- `header("X-C-Version", "start#4.7.0")`
-`header`字段`X-C-Version` 是否 `startsWith` `4.7.0`
-- `header("X-C-Version", "end#4.7.0")`
-`header`字段`X-C-Version` 是否 `endsWith` `4.7.0`
-- `header("X-C-Version", "contains#4.7.0")`
-`header`字段`X-C-Version` 是否 `contains` `4.7.0`
+等等
 
-### cookie
-语法 `cookie("nihao", "234")`
+### 2. welcome
+其它接口
+1. `block`后面不是数字,如 `/blockabc`, 立刻返回`200`
+2. 其它接口，如 `/abc`, 立刻返回`200`
 
-### host
-语法 `host("suffix", "-sit")`  
-`suffix`的意思是，对于一个域名 `a-b-c.hello.com` 来说，第一个点号`.` 之前的字符串 `a-b-c` 是否以  `-sit` 结尾  
-暂时只支持`suffix` `prefix`
+## 使用
+提供了两种思路
+1. win10, 请到 release 里面下载
+2. docker, 镜像地址为 `hwhaocool/block-web-server:latest`
 
-## 待办
-1. 规则匹配优化， cookie 取出来缓存一下  
-2. 规则检测的时候，多个规则，一个合法，其它不合法，目前不会报错  
+
