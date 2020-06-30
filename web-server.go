@@ -31,7 +31,7 @@ func main() {
     router.NoRoute(welcome)
 
     //启动 gin 并监听端口
-    err := router.Run(":9990")
+    err := router.Run(":8080")
     if err != nil {
         Logger.Fatal("proxy start failed,", zap.Error(err))
     }
