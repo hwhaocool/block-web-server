@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,6 +26,8 @@ func main() {
 	router := gin.New()
 
 	router.Any("/block:s", block)
+	router.GET("/kb/:s", KB)
+	router.GET("/mb/:s", MB)
 
 	//其它 -> 进行分发
 	router.NoRoute(welcome)
@@ -55,7 +58,8 @@ func welcome(ctx *gin.Context) {
 // block 阻塞x秒的接口
 func block(ctx *gin.Context) {
 	str := ctx.Param("s")
-	if 0 == len(str) {
+	if str == "" {
+		Logger.Warn("block  time is empty")
 		welcome(ctx)
 		return
 	}
@@ -83,6 +87,60 @@ func block(ctx *gin.Context) {
 		"type":    "ok",
 		"message": "block ok",
 		"ip":      getLocalIP(),
+	})
+}
+
+// 返回 x KB的响应体
+func KB(ctx *gin.Context) {
+	str := ctx.Param("s")
+	if str == "" {
+		Logger.Warn("kb size is empty")
+		welcome(ctx)
+		return
+	}
+
+	size, err := strconv.Atoi(str)
+
+	if err != nil {
+		welcome(ctx)
+		return
+	}
+
+	Logger.Info("KB",
+		zap.Int("size", size),
+		zap.String("remote addr", ctx.Request.RemoteAddr),
+		zap.String("path", ctx.Request.URL.Path))
+
+	ctx.JSON(200, gin.H{
+		"code":    0,
+		"message": strings.Repeat("*", size*1024),
+	})
+}
+
+// 返回 x MB的响应体
+func MB(ctx *gin.Context) {
+	str := ctx.Param("s")
+	if str == "" {
+		Logger.Warn("MB size is empty")
+		welcome(ctx)
+		return
+	}
+
+	size, err := strconv.Atoi(str)
+
+	if err != nil {
+		welcome(ctx)
+		return
+	}
+
+	Logger.Info("MB",
+		zap.Int("size", size),
+		zap.String("remote addr", ctx.Request.RemoteAddr),
+		zap.String("path", ctx.Request.URL.Path))
+
+	ctx.JSON(200, gin.H{
+		"code":    0,
+		"message": strings.Repeat("*", size*1024*1024),
 	})
 }
 
