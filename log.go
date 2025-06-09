@@ -1,11 +1,11 @@
 package main
 
 import (
-    "os"
+	"os"
 
-    "go.uber.org/zap"
-    "go.uber.org/zap/zapcore"
-    lumberjack "gopkg.in/natefinch/lumberjack.v2"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
 // Logger 日志对象
@@ -13,52 +13,52 @@ var Logger *zap.Logger
 
 // InitLogger 初始化
 func InitLogger() *zap.Logger {
-    level := os.Getenv("log_level")
-    if "" == level {
-        level = "info"
-    }
-    Logger = initLogger("logs/proxy-grey.log", level)
-    return Logger
+	level := os.Getenv("log_level")
+	if "" == level {
+		level = "info"
+	}
+	Logger = initLogger("logs/app.log", level)
+	return Logger
 }
 
 // initLogger 初始化 zap 的日志
 func initLogger(logpath string, loglevel string) *zap.Logger {
-    hook := lumberjack.Logger{
-        Filename:   logpath, // ⽇志⽂件路径
-        MaxSize:    200,     // megabytes MB
-        MaxBackups: 1,       // 最多保留1个备份
-    }
+	hook := lumberjack.Logger{
+		Filename:   logpath, // ⽇志⽂件路径
+		MaxSize:    200,     // megabytes MB
+		MaxBackups: 1,       // 最多保留1个备份
+	}
 
-    w := zapcore.NewMultiWriteSyncer(
-        zapcore.AddSync(os.Stdout), 
-        // zapcore.AddSync(os.Stderr), 
-        zapcore.AddSync(&hook),
-    )
+	w := zapcore.NewMultiWriteSyncer(
+		zapcore.AddSync(os.Stdout),
+		// zapcore.AddSync(os.Stderr),
+		zapcore.AddSync(&hook),
+	)
 
-    var level zapcore.Level
-    switch loglevel {
-    case "debug":
-        level = zap.DebugLevel
-    case "info":
-        level = zap.InfoLevel
-    case "error":
-        level = zap.ErrorLevel
-    default:
-        level = zap.InfoLevel
-    }
+	var level zapcore.Level
+	switch loglevel {
+	case "debug":
+		level = zap.DebugLevel
+	case "info":
+		level = zap.InfoLevel
+	case "error":
+		level = zap.ErrorLevel
+	default:
+		level = zap.InfoLevel
+	}
 
-    // encoderConfig := zap.NewProductionEncoderConfig()
-    encoderConfig := zap.NewDevelopmentEncoderConfig()
-    encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-    // encoderConfig.EncodeCaller = zapcore.FullCallerEncoder
-    // encoderConfig.CallerKey = "caller"
+	// encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig := zap.NewDevelopmentEncoderConfig()
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	// encoderConfig.EncodeCaller = zapcore.FullCallerEncoder
+	// encoderConfig.CallerKey = "caller"
 
-    core := zapcore.NewCore(
-        zapcore.NewConsoleEncoder(encoderConfig),
-        w,
-        level,
-    )
+	core := zapcore.NewCore(
+		zapcore.NewConsoleEncoder(encoderConfig),
+		w,
+		level,
+	)
 
-    logger := zap.New(core, zap.Development(), zap.AddCaller())
-    return logger
+	logger := zap.New(core, zap.Development(), zap.AddCaller())
+	return logger
 }
